@@ -29,3 +29,9 @@ getElement n xs = xs !! n
 
 str :: String -> String
 str a = a ++ a
+
+deeper :: Int -> Int
+deeper a
+    | a < 10 = deeper (a + 1)
+    | a == 15 = error "we are here"
+    | otherwise = 15
