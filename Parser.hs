@@ -37,26 +37,26 @@ parseInt [] = error "Empty list"
 
 parseDict :: String -> ([MoveData], String)
 parseDict "de" = ([], "")
-parseDict ('d':t) = parseDict' t [MoveData (0,0) "" '\\']
+parseDict ('d':t) = parseDict' t [MoveData (-1,-1) "" '\\']
     where
         parseDict' :: String -> [MoveData] -> ([MoveData], String)
         parseDict' [] acc= (acc, "")
         parseDict' symbol [] = ([], symbol)
-        parseDict' (symbol:rest) (move:acc) 
-            | symbol == 'd' = parseDict' rest (move:acc) 
-            | symbol == 'e' = parseDict' rest (move:acc) 
+        parseDict' (symbol:rest) moveList@(move:acc) 
+            | symbol == 'd' || symbol == 'l' = parseDict' rest moveList 
+            | symbol == 'e' = parseDict' rest moveList
             | symbol `elem` ['0'..'9'] =
             let
                 (value, remainder) = parseValue (symbol:rest)
                 (move2, remainder2)
                     | value == "id" = parseID move remainder
                     | value == "c" = parseCoordinates move remainder
-                    | value == "prev" = (MoveData (0,0) "" '\\':move:acc, remainder)
+                    | value == "prev" = (MoveData (-1,-1) "" '\\':move:acc, remainder)
                     | value == "v" = parseV move remainder
                     | otherwise = ([move], remainder)
 
                 in parseDict' remainder2 (move2 ++ acc)
-            | otherwise = (move:acc , rest)
+            | otherwise = (moveList , rest)
 parseDict _ = error "List expected"
 
 parseValue :: String -> (String, String)
