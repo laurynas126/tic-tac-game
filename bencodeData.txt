@@ -214,4 +214,63 @@ moves:
 (2, 1) = O by ""
 -}
 message :: String
-message = "d1:cli1ei2ee2:id0:4:prevd1:cli2ei2ee2:id0:4:prevd1:cli0ei0ee2:id0:4:prevd1:cli0ei2ee2:id0:4:prevd1:cli2ei0ee2:id0:4:prevd1:cli0ei1ee2:id0:4:prevd1:cli2ei1ee2:id0:1:v1:oe1:v1:oe1:v1:oe1:v1:oe1:v1:xe1:v1:oe1:v1:xe"
+message = "d1:cli1ei2ee2:id0:4:prevd1:cli2ei2ee2:id0:4:prevd1:cli0ei0ee2:id0:4:prevd1:cli0ei2ee2:id0:4:prevd1:cli2ei0ee2:id0:4:prevd1:cli0ei1ee2:id0:4:prevd1:cli2ei1ee2:id0:1:v1:oe1:v1:oe1:v1:oe1:v1:oe1:v1:xe1:v1:oe1:v1:xe":t
+
+
+
+module WildTicTacToe.Messages.Bencode
+where
+
+{-
+message to react to
+board:
+ |0|1|2|
+-+-+-+-+x
+0|O|O|O|
+-+-+-+-+
+1|O|O|X|
+-+-+-+-+
+2| |X|O|
+-+-+-+-+
+ y
+
+moves:
+(2, 1) = X by "iU"
+(2, 2) = O by "psxadqHuCKMrIpFGDHrtPWvLWwvuF"
+(1, 2) = X by "iU"
+(1, 1) = O by "psxadqHuCKMrIpFGDHrtPWvLWwvuF"
+(0, 1) = O by "iU"
+(1, 0) = O by "psxadqHuCKMrIpFGDHrtPWvLWwvuF"
+(2, 0) = O by "iU"
+(0, 0) = O by "psxadqHuCKMrIpFGDHrtPWvLWwvuF"
+-}
+message :: String
+message = "d1:cli2ei1ee2:id2:iU4:prevd1:cli2ei2ee2:id29:psxadqHuCKMrIpFGDHrtPWvLWwvuF4:prevd1:cli1ei2ee2:id2:iU4:prevd1:cli1ei1ee2:id29:psxadqHuCKMrIpFGDHrtPWvLWwvuF4:prevd1:cli0ei1ee2:id2:iU4:prevd1:cli1ei0ee2:id29:psxadqHuCKMrIpFGDHrtPWvLWwvuF4:prevd1:cli2ei0ee2:id2:iU4:prevd1:cli0ei0ee2:id29:psxadqHuCKMrIpFGDHrtPWvLWwvuF1:v1:oe1:v1:oe1:v1:oe1:v1:oe1:v1:oe1:v1:xe1:v1:oe1:v1:xe"
+
+
+
+{-
+message to react to
+board:
+ |0|1|2|
+-+-+-+-+x
+0|O|O|O|
+-+-+-+-+
+1|O|O|X|
+-+-+-+-+
+2|X|X|O|
+-+-+-+-+
+ y
+
+moves:
+(2, 1) = X by "iU"
+(2, 2) = O by "psxadqHuCKMrIpFGDHrtPWvLWwvuF"
+(1, 2) = X by "iU"
+(1, 1) = O by "psxadqHuCKMrIpFGDHrtPWvLWwvuF"
+(0, 1) = O by "iU"
+(1, 0) = O by "psxadqHuCKMrIpFGDHrtPWvLWwvuF"
+(2, 0) = O by "iU"
+(0, 0) = O by "psxadqHuCKMrIpFGDHrtPWvLWwvuF"
+-}
+message :: String
+message = "d1:cli2ei1ee2:id2:iU4:prevd1:cli2ei2ee2:id29:psxadqHuCKMrIpFGDHrtPWvLWwvuF4:prevd1:cli1ei2ee2:id2:iU4:prevd1:cli1ei1ee2:id29:psxadqHuCKMrIpFGDHrtPWvLWwvuF4:prevd1:cli0ei1ee2:id2:iU4:prevd1:cli1ei0ee2:id29:psxadqHuCKMrIpFGDHrtPWvLWwvuF4:prevd1:cli2ei0ee2:id2:iU4:prevd1:cli0ei0ee2:id29:psxadqHuCKMrIpFGDHrtPWvLWwvuF4:prevd1:cli0ei2ee2:id29:psxadqHuCKMrIpFGDHrtPWvLWwvuF1:v1:xe1:v1:oe1:v1:oe1:v1:oe1:v1:oe1:v1:oe1:v1:xe1:v1:oe1:v1:xe"

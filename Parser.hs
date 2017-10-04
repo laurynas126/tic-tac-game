@@ -1,12 +1,16 @@
 module Parser where
 
 import Data.Either
+import Data.List
 
 data MoveData = MoveData {
     moveC :: (Int, Int),
     moveID :: String,
     moveV :: Char
 } deriving (Show, Eq)
+
+legalMoves :: [(Int, Int)]
+legalMoves = [(0,0),(0,1),(0,2),(1,0),(1,1),(1,2),(2,0),(2,1),(2,2)]
 
 test :: MoveData
 test = MoveData (0,1) "abc" '4'
@@ -16,9 +20,6 @@ nullCoordinates = (-1,-1)
 
 newMove :: MoveData
 newMove = MoveData nullCoordinates "" '\\'
-
-empty :: String
-empty = "de"
 
 msg :: String
 msg = "di42ei0ei777ee"
@@ -35,9 +36,8 @@ msg4 = "d2:id5:MY_ID1:cli1ei2ee1:v1:o4:prevd2:id5:UR_ID1:cli2ei0ee1:v1:zee"
 msg5 :: String
 msg5 = "d2:id5:MY_ID1:cli1ei2ee1:v1:o4:prevd2:id5:UR_ID1:cli2ei0ee1:v1:z4:prevd2:id5:UR_ID1:cli1ei1ee1:v1:Geee"
 
-
-message :: String
-message = "d1:cli1ei1ee1:v1:o2:id7:ufbqJdW4:prevd1:cli0ei2ee1:v1:x2:id11:OvEdLQavGnz4:prevd1:cli0ei0ee1:v1:x2:id7:ufbqJdWeee"
+message1 :: String
+message1 = "d1:cli1ei1ee1:v1:o2:id7:ufbqJdW4:prevd1:cli0ei2ee1:v1:x2:id11:OvEdLQavGnz4:prevd1:cli0ei0ee1:v1:x2:id7:ufbqJdWeee"
 
 message2 :: String
 message2 = "d1:cli2ei0ee2:id2:xO4:prevd1:cli0ei0ee2:id2:xO1:v1:oe1:v1:xe"
@@ -79,11 +79,28 @@ move x =
 validateGame :: Either String [MoveData] -> Either String [MoveData]
 validateGame (Left a) = Left a
 validateGame (Right []) = Right []
-validateGame (Right b) = Right b
-
+validateGame (Right b) = 
+    let
+        allMoveList = [moveC x | x <- b]
+        illegalMoves = [x | x <- allMoveList, x `notElem` legalMoves]
+        duplicateMoves = allMoveList \\ nub allMoveList
+        result
+            | not (null illegalMoves) = Left $ "Illegal moves: " ++ show illegalMoves
+            | not (null duplicateMoves) = Left $ "Duplicate moves: " ++ show duplicateMoves
+            | otherwise = Right b
+        in result
+       
 nextMove :: [MoveData] -> Maybe (Int, Int, Char)
 nextMove [] = Just (1,1,'x')
-nextMove _ = Nothing
+nextMove moveList
+    | length moveList == 9 = Nothing
+    | otherwise = 
+        let 
+            allMoveList = [moveC x | x <- moveList]
+            emptyList = [x | x <- legalMoves, x `notElem` allMoveList]
+            firstEmpty = head emptyList
+            result = (fst firstEmpty, snd firstEmpty, 'o')
+        in Just result
 
 parseDict :: String -> Either String [MoveData]
 parseDict "de" = Right []
