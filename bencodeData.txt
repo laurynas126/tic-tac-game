@@ -188,3 +188,30 @@ moves:
 message :: String
 message = "de"
 
+
+
+
+{-
+message to react to
+board:
+ |0|1|2|
+-+-+-+-+x
+0|X| |O|
+-+-+-+-+
+1|O| |O|
+-+-+-+-+
+2|O|X|O|
+-+-+-+-+
+ y
+
+moves:
+(1, 2) = X by ""
+(2, 2) = O by ""
+(0, 0) = X by ""
+(0, 2) = O by ""
+(2, 0) = O by ""
+(0, 1) = O by ""
+(2, 1) = O by ""
+-}
+message :: String
+message = "d1:cli1ei2ee2:id0:4:prevd1:cli2ei2ee2:id0:4:prevd1:cli0ei0ee2:id0:4:prevd1:cli0ei2ee2:id0:4:prevd1:cli2ei0ee2:id0:4:prevd1:cli0ei1ee2:id0:4:prevd1:cli2ei1ee2:id0:1:v1:oe1:v1:oe1:v1:oe1:v1:oe1:v1:xe1:v1:oe1:v1:xe"
