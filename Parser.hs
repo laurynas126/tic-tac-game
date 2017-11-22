@@ -19,7 +19,7 @@ nullCoordinates :: (Int, Int)
 nullCoordinates = (-1,-1)
 
 newMove :: MoveData
-newMove = MoveData nullCoordinates "" '\\'
+newMove = MoveData nullCoordinates "" '?'
 
 msg1 :: String
 msg1 = "di42ei0ei777ee"
@@ -115,8 +115,7 @@ parseDict ('d':t) = parseDict' t [newMove] 0
             | depth == -99 = Left "Invalid data format: unexpected termination of dictionary/list: "
             | symbol == 'd' || symbol == 'l' = parseDict' rest moveList depth
             | symbol == 'e' = parseDict' rest moveList (depth + 1)
-            | symbol `elem` ['0'..'9'] && notElem ':' rest 
-                = Left "Invalid data format: number not terminated with ':'"
+            | symbol `elem` ['0'..'9'] && notElem ':' rest = Left "Invalid data format: number not terminated with ':'"
             | symbol `elem` ['0'..'9'] =
             let
                 index
