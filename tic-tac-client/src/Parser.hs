@@ -2,7 +2,39 @@ module Parser where
     
     import Data.Either
     import Data.List
+    import Data.Maybe
     import Control.Monad
+    import Data.Function (on)
+
+    g1 :: String
+    g1 = "d1:cli1ei1ee2:id2:LD1:v1:xe"
+      
+    g2 :: String
+    g2 = "d1:cli0ei0ee2:id2:LD4:prevd1:cli1ei1ee2:id2:LD1:v1:xe1:v1:oe"
+
+    g3 :: String
+    g3 = "d1:cli0ei1ee2:id2:LD4:prevd1:cli1ei1ee2:id2:LD1:v1:xe1:v1:oe"
+
+    msg1 :: String
+    msg1 = "d2:id5:MY_ID1:cli1ei2eee"
+    
+    msg2 :: String
+    msg2 = "d2:id5:MY_ID1:cli1ei2ee1:v1:o4:prevd2:id5:UR_ID1:cli2ei0ee1:v1:zee"
+    
+    msg3 :: String
+    msg3 = "d2:id5:MY_ID1:cli1ei2ee1:v1:o4:prevd2:id5:UR_ID1:cli2ei0ee1:v1:z4:prevd2:id5:UR_ID1:cli1ei1ee1:v1:Geee"
+    
+    message1 :: String
+    message1 = "d1:cli1ei1ee1:v1:o2:id7:ufbqJdW4:prevd1:cli0ei2ee1:v1:x2:id11:OvEdLQavGnz4:prevd1:cli0ei0ee1:v1:x2:id7:ufbqJdWeee"
+    
+    message2 :: String
+    message2 = "d1:cli2ei0ee2:id2:xO4:prevd1:cli0ei0ee2:id2:xO1:v1:oe1:v1:xe"
+    
+    message3 :: String
+    message3 = "d1:cli0ei2ee2:id1:w4:prevd1:cli2ei1ee2:id5:WgEYE4:prevd1:cli1ei1ee2:id1:w1:v1:xe1:v1:oe1:v1:xe"
+    
+    message4 :: String
+    message4 = "d1:cli2ei0ee2:id25:MnQxKaeMJPTGsApXOrSwiSNnX4:prevd1:cli1ei2ee2:id22:MCWPFWuHBPApBdNBKxjbud4:prevd1:cli2ei2ee2:id25:MnQxKaeMJPTGsApXOrSwiSNnX4:prevd1:cli2ei1ee2:id22:MCWPFWuHBPApBdNBKxjbud4:prevd1:cli0ei0ee2:id25:MnQxKaeMJPTGsApXOrSwiSNnX4:prevd1:cli0ei2ee2:id22:MCWPFWuHBPApBdNBKxjbud4:prevd1:cli1ei0ee2:id25:MnQxKaeMJPTGsApXOrSwiSNnX4:prevd1:cli0ei1ee2:id22:MCWPFWuHBPApBdNBKxjbud1:v1:oe1:v1:oe1:v1:oe1:v1:oe1:v1:oe1:v1:xe1:v1:oe1:v1:xe"
     
     data MoveData = MoveData {
         moveC :: (Int, Int),
@@ -14,7 +46,7 @@ module Parser where
     legalMoves = [(1,1),(0,0),(0,1),(0,2),(1,0),(1,2),(2,0),(2,1),(2,2)]
 
     allLines :: [(Int, Int, Int)]
-    allLines = [(0,1,2), (3,4,5), (6,7,8), (0, 3, 6), (1,4,7), (2,5,8), (0,4,8), (2,4,6)]
+    allLines = [(3,4,5), (1,4,7), (2,4,6), (0,4,8), (0,1,2),  (6,7,8), (0, 3, 6),  (2,5,8)]
     
     toSingleCoordinate :: (Int, Int) -> Int
     toSingleCoordinate (x, y) = x + 3*y
@@ -30,33 +62,6 @@ module Parser where
     
     newMove :: MoveData
     newMove = MoveData nullCoordinates "" '?'
-    
-    msg1 :: String
-    msg1 = "di42ei0ei777ee"
-    
-    msg2 :: String
-    msg2 = "d2:idi16ee"
-    
-    msg3 :: String
-    msg3 = "d2:id5:MY_ID1:cli1ei2eee"
-    
-    msg4 :: String
-    msg4 = "d2:id5:MY_ID1:cli1ei2ee1:v1:o4:prevd2:id5:UR_ID1:cli2ei0ee1:v1:zee"
-    
-    msg5 :: String
-    msg5 = "d2:id5:MY_ID1:cli1ei2ee1:v1:o4:prevd2:id5:UR_ID1:cli2ei0ee1:v1:z4:prevd2:id5:UR_ID1:cli1ei1ee1:v1:Geee"
-    
-    message1 :: String
-    message1 = "d1:cli1ei1ee1:v1:o2:id7:ufbqJdW4:prevd1:cli0ei2ee1:v1:x2:id11:OvEdLQavGnz4:prevd1:cli0ei0ee1:v1:x2:id7:ufbqJdWeee"
-    
-    message2 :: String
-    message2 = "d1:cli2ei0ee2:id2:xO4:prevd1:cli0ei0ee2:id2:xO1:v1:oe1:v1:xe"
-    
-    message3 :: String
-    message3 = "d1:cli0ei2ee2:id1:w4:prevd1:cli2ei1ee2:id5:WgEYE4:prevd1:cli1ei1ee2:id1:w1:v1:xe1:v1:oe1:v1:xe"
-    
-    message4 :: String
-    message4 = "d1:cli2ei0ee2:id25:MnQxKaeMJPTGsApXOrSwiSNnX4:prevd1:cli1ei2ee2:id22:MCWPFWuHBPApBdNBKxjbud4:prevd1:cli2ei2ee2:id25:MnQxKaeMJPTGsApXOrSwiSNnX4:prevd1:cli2ei1ee2:id22:MCWPFWuHBPApBdNBKxjbud4:prevd1:cli0ei0ee2:id25:MnQxKaeMJPTGsApXOrSwiSNnX4:prevd1:cli0ei2ee2:id22:MCWPFWuHBPApBdNBKxjbud4:prevd1:cli1ei0ee2:id25:MnQxKaeMJPTGsApXOrSwiSNnX4:prevd1:cli0ei1ee2:id22:MCWPFWuHBPApBdNBKxjbud1:v1:oe1:v1:oe1:v1:oe1:v1:oe1:v1:oe1:v1:xe1:v1:oe1:v1:xe"
     
     fromLeft :: a -> Either a b -> a
     fromLeft _ (Left a) = a
@@ -126,23 +131,93 @@ module Parser where
     makeMove bencodeData = do
         let moves = parseDict bencodeData
         let validateResult = validateGame (moves)
-        if isRight validateResult
-            then toBencode bencodeData(getNextMove (fromRight  [] validateResult))
-            else fromLeft "Unknown error occured" validateResult 
+        let nMove = getNextMove (fromRight  [] validateResult)
+        let resultStr
+                | isNothing nMove = "Game has ended"
+                | isLeft validateResult = fromLeft  "Could not validate" validateResult
+                | otherwise = toBencode bencodeData nMove
+        resultStr
 
-    getNextMove :: [MoveData] -> MoveData
-    getNextMove [] = MoveData (1,1) "LD" 'x'
+    getNextMove :: [MoveData] -> Maybe MoveData
+    getNextMove [] = Just (MoveData (1,1) "LD" 'x')
     getNextMove moveList = do
         let allMoveList = [moveC x | x <- moveList]
-        let emptyList = [x | x <- legalMoves, x `notElem` allMoveList]
-        let firstEmpty
-                | null emptyList = nullCoordinates
-                | otherwise = head emptyList
-        MoveData firstEmpty "LD" 'x'
+        let emptyList = [(toSingleCoordinate x, '?') | x <- legalMoves, x `notElem` allMoveList]
+        let coordList = sortMoves ([(toSingleCoordinate (moveC x),moveV x) | x <- moveList] ++ emptyList)
+        let hasWinner = checkWinner coordList
+        let winMove = getWinMove coordList
+        let defMove = getDefMove coordList
+        let def2Move = getDef2Move coordList
+        let getMove
+                | hasWinner || null emptyList = Nothing
+                | not (null winMove) = Just (toMoveData (head winMove))
+                | not (null defMove) = Just (toMoveData (head defMove))
+                | not (null def2Move) = Just (toMoveData (head def2Move))
+                | otherwise = Just (MoveData (toDoubleCoordinate (fst (head emptyList))) "LD" 'x')
+        getMove
 
-    toBencode :: String -> MoveData -> String
-    toBencode "" md = "d1:cli" ++ show (fst (moveC md)) ++ "ei" ++ show (snd (moveC md)) ++ "ee2:id" ++  show (length (moveID md)) ++ ":" ++ moveID md ++ "1:v1:" ++ [moveV md] ++ "e"
-    toBencode game md = "d1:cli" ++ show (fst (moveC md)) ++ "ei" ++ show (snd (moveC md)) ++ "ee2:id" ++  show (length (moveID md)) ++ ":" ++ moveID md ++ "4:prev" ++ game ++ "1:v1:" ++ [moveV md] ++ "e"
+    toMoveData :: (Int, Char) -> MoveData
+    toMoveData (n, c) = MoveData (toDoubleCoordinate n) "LD" c
+
+    sortMoves :: Ord a => [(a, b)] -> [(a, b)]
+    sortMoves = sortBy (compare `on` fst)
+
+    toBencode :: String -> Maybe MoveData -> String
+    toBencode _ Nothing = ""
+    toBencode "" (Just md) = "d1:cli" ++ show (fst (moveC md)) ++ "ei" ++ show (snd (moveC md)) ++ "ee2:id" ++  show (length (moveID md)) ++ ":" ++ moveID md ++ "1:v1:" ++ [moveV md] ++ "e"
+    toBencode game (Just md) = "d1:cli" ++ show (fst (moveC md)) ++ "ei" ++ show (snd (moveC md)) ++ "ee2:id" ++  show (length (moveID md)) ++ ":" ++ moveID md ++ "4:prev" ++ game ++ "1:v1:" ++ [moveV md] ++ "e"
+
+    list :: [(Int, Char)]
+    list = [(0,'x'),(1,'?'),(2,'x'),(3,'?'),(4,'?'),(5,'?'),(6,'?'),(7,'?'),(8,'?')]
+
+    checkWinner :: [(Int, Char)] -> Bool
+    checkWinner moves = do
+        let getWinLines = [al| al <- allLines, snd (moves !! fst3 al) == snd (moves !! snd3 al),snd (moves !! snd3 al) == snd (moves !! thd3 al), snd (moves !! fst3 al) /= '?']
+        not (null getWinLines)
+
+    getWinMove :: [(Int, Char)] -> [(Int, Char)]
+    getWinMove moves = do
+        al <- allLines
+        let winMove
+                | snd (moves !! fst3 al) == snd (moves !! snd3 al) && snd (moves !! fst3 al) /= '?' && snd (moves !! thd3 al) == '?' = [(thd3 al, snd (moves !! fst3 al))]
+                | snd (moves !! fst3 al) == snd (moves !! thd3 al) && snd (moves !! fst3 al) /= '?' && snd (moves !! snd3 al) == '?' = [(snd3 al, snd (moves !! fst3 al))]
+                | snd (moves !! snd3 al) == snd (moves !! thd3 al) && snd (moves !! snd3 al) /= '?' && snd (moves !! fst3 al) == '?' = [(fst3 al, snd (moves !! snd3 al))]
+                | otherwise = []
+        winMove
+        
+    getDefMove :: [(Int, Char)] -> [(Int, Char)]
+    getDefMove moves = do
+        al <- allLines        
+        let defMove
+                | snd (moves !! fst3 al) /= snd (moves !! snd3 al) && snd (moves !! fst3 al) /= '?' && snd (moves !! snd3 al) /= '?' && snd (moves !! thd3 al) == '?' = [(thd3 al, snd (moves !! fst3 al))]
+                | snd (moves !! snd3 al) /= snd (moves !! thd3 al) && snd (moves !! snd3 al) /= '?' && snd (moves !! thd3 al) /= '?' && snd (moves !! fst3 al) == '?' = [(fst3 al, snd (moves !! thd3 al))]
+                | snd (moves !! fst3 al) /= snd (moves !! thd3 al) && snd (moves !! fst3 al) /= '?' && snd (moves !! thd3 al) /= '?' && snd (moves !! snd3 al) == '?' = [(snd3 al, snd (moves !! fst3 al))]
+                | otherwise = []
+        defMove
+        
+    getDef2Move :: [(Int, Char)] -> [(Int, Char)]
+    getDef2Move moves = do
+        al <- allLines        
+        let defMove
+                | snd (moves !! snd3 al) /= '?' && snd (moves !! thd3 al) == '?' = [(thd3 al, invertMove (snd (moves !! snd3 al)))]
+                | snd (moves !! fst3 al) /= '?' && snd (moves !! thd3 al) == '?' = [(thd3 al, invertMove (snd (moves !! fst3 al)))]
+                | snd (moves !! thd3 al) /= '?' && snd (moves !! snd3 al) == '?' = [(snd3 al, invertMove (snd (moves !! thd3 al)))]
+                | snd (moves !! thd3 al) /= '?' && snd (moves !! fst3 al) == '?' = [(fst3 al, invertMove (snd (moves !! thd3 al)))]
+                | otherwise = []
+        defMove
+    invertMove :: Char -> Char
+    invertMove 'x' = 'o'
+    invertMove 'o' = 'x'
+    invertMove _ = '?'
+
+    fst3 :: (a, b, c) -> a
+    fst3 (x, _, _) = x
+
+    snd3 :: (a, b, c) -> b
+    snd3 (_, x, _) = x
+
+    thd3 :: (a, b, c) -> c
+    thd3 (_, _, x) = x
 
     parseDict :: String -> Either String [MoveData]
     parseDict "de" = Right []
