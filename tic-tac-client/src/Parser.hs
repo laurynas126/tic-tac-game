@@ -81,25 +81,7 @@ module Parser where
                 rest1 = drop strLength rest
                 in (read iAsStr, rest1)
         | otherwise = (-99,rest)
-    
-    getGameState :: String -> [MoveData]
-    getGameState msg = do
-        let result = validateGame (parseDict msg)
-        getBoard result
-
-    getBoard :: Either String [MoveData] -> [MoveData]
-    getBoard (Left _) = []
-    getBoard (Right moves) = moves
-
-    move :: String -> Either String (Maybe (Int, Int, Char))
-    move msg = 
-        let 
-            validateResult = validateGame (parseDict msg)
-            value 
-                | isLeft validateResult = Left $ fromLeft  "Could not validate" validateResult
-                | otherwise = Right (nextMove (fromRight  [] validateResult))
-            in value
-    
+        
     validateGame :: Either String [MoveData] -> Either String [MoveData]
     validateGame (Left a) = Left a
     validateGame (Right []) = Right []
@@ -126,20 +108,19 @@ module Parser where
                 result = (fst firstEmpty, snd firstEmpty, 'o')
             in Just result
     
-    makeMove :: String -> String
-    makeMove "" = toBencode "" (getNextMove [])
+    makeMove :: String -> (Bool, String)
+    makeMove "" = (False, toBencode "" (snd (getNextMove [])))
     makeMove bencodeData = do
         let moves = parseDict bencodeData
         let validateResult = validateGame (moves)
         let nMove = getNextMove (fromRight  [] validateResult)
         let resultStr
-                | isNothing nMove = "Game has ended"
-                | isLeft validateResult = fromLeft  "Could not validate" validateResult
-                | otherwise = toBencode bencodeData nMove
+                | isLeft validateResult = (True, fromLeft  "Could not validate" validateResult)
+                | otherwise = (fst nMove, toBencode bencodeData (snd nMove))
         resultStr
 
-    getNextMove :: [MoveData] -> Maybe MoveData
-    getNextMove [] = Just (MoveData (1,1) "LD" 'x')
+    getNextMove :: [MoveData] -> (Bool, MoveData)
+    getNextMove [] = (False, MoveData (1,1) "LD" 'x')
     getNextMove moveList = do
         let allMoveList = [moveC x | x <- moveList]
         let emptyList = [(toSingleCoordinate x, '?') | x <- legalMoves, x `notElem` allMoveList]
@@ -149,12 +130,14 @@ module Parser where
         let defMove = getDefMove coordList
         let def2Move = getDef2Move coordList
         let getMove
-                | hasWinner || null emptyList = Nothing
-                | not (null winMove) = Just (toMoveData (head winMove))
-                | not (null defMove) = Just (toMoveData (head defMove))
-                | not (null def2Move) = Just (toMoveData (head def2Move))
-                | otherwise = Just (MoveData (toDoubleCoordinate (fst (head emptyList))) "LD" 'x')
-        getMove
+                | hasWinner || null emptyList = (True, newMove)
+                | not (null winMove) = (True, toMoveData (head winMove))
+                | not (null defMove) = (False, toMoveData (head defMove))
+                | not (null def2Move) = (False, toMoveData (head def2Move))
+                | otherwise = (False, MoveData (toDoubleCoordinate (fst (head emptyList))) "LD" 'x')
+        if length emptyList == 1 
+            then (True, snd getMove)
+            else getMove
 
     toMoveData :: (Int, Char) -> MoveData
     toMoveData (n, c) = MoveData (toDoubleCoordinate n) "LD" c
@@ -162,10 +145,9 @@ module Parser where
     sortMoves :: Ord a => [(a, b)] -> [(a, b)]
     sortMoves = sortBy (compare `on` fst)
 
-    toBencode :: String -> Maybe MoveData -> String
-    toBencode _ Nothing = ""
-    toBencode "" (Just md) = "d1:cli" ++ show (fst (moveC md)) ++ "ei" ++ show (snd (moveC md)) ++ "ee2:id" ++  show (length (moveID md)) ++ ":" ++ moveID md ++ "1:v1:" ++ [moveV md] ++ "e"
-    toBencode game (Just md) = "d1:cli" ++ show (fst (moveC md)) ++ "ei" ++ show (snd (moveC md)) ++ "ee2:id" ++  show (length (moveID md)) ++ ":" ++ moveID md ++ "4:prev" ++ game ++ "1:v1:" ++ [moveV md] ++ "e"
+    toBencode :: String -> MoveData -> String
+    toBencode "" md = "d1:cli" ++ show (fst (moveC md)) ++ "ei" ++ show (snd (moveC md)) ++ "ee2:id" ++  show (length (moveID md)) ++ ":" ++ moveID md ++ "1:v1:" ++ [moveV md] ++ "e"
+    toBencode game md = "d1:cli" ++ show (fst (moveC md)) ++ "ei" ++ show (snd (moveC md)) ++ "ee2:id" ++  show (length (moveID md)) ++ ":" ++ moveID md ++ "4:prev" ++ game ++ "1:v1:" ++ [moveV md] ++ "e"
 
     list :: [(Int, Char)]
     list = [(0,'x'),(1,'?'),(2,'x'),(3,'?'),(4,'?'),(5,'?'),(6,'?'),(7,'?'),(8,'?')]
@@ -295,3 +277,8 @@ module Parser where
                 | length value > 1 = '\\'
                 | otherwise = head value
         in ([move1 {moveV = moveSymbol}], remainder)
+
+    isValidBencode :: String -> Bool
+    isValidBencode ('d':xs) = last xs == 'e'
+    isValidBencode _ = False
+         

@@ -1,36 +1,41 @@
 module GameClient where 
 
-import System.Environment
 import HttpClient
 import Parser
 
-url1 :: String
-url1 = "http://tictactoe.haskell.lt/game/" ++ gameId ++ "/player/" ++ show playerId
+url :: String
+url = "http://tictactoe.haskell.lt/game/"
 
-gameId :: String
-gameId = "holy shit!"
+runCycle :: String -> String -> IO ()
+runCycle gameID playerID = do
+    let gameUrl = "http://tictactoe.haskell.lt/game/" ++ gameID ++ "/player/" ++ playerID
+    _ <- first playerID gameUrl
+    runCycle' gameUrl 1
 
-playerId :: Int
-playerId = 2
+runCycle' :: String -> Int -> IO ()
+runCycle' _ 500 = return ()
+runCycle' gameUrl status = do
+    (responseCode, bencode) <- HttpClient.getHttp gameUrl
+    let (isDone, nextMove)
+            | responseCode /= 500 = Parser.makeMove bencode
+            | otherwise = (True, "No response")
+    (response2, result) <- if Parser.isValidBencode nextMove
+        then HttpClient.postHttp gameUrl nextMove
+        else do
+            putStrLn nextMove
+            return (500, "")
+    if isDone
+        then do
+            putStrLn "Game is done"
+            return ()
+        else runCycle' gameUrl response2
 
-runCycle :: IO ()
-runCycle = do
-    args <- getArgs
-    let id
-            | length args == 1 && ((last args == "1") || (last args == "2")) = last args
-            | otherwise = error "Valid player ID: 1, 2 (use: tic-tac-client-exe <playerID>)"
-    let url = "http://tictactoe.haskell.lt/game/" ++ gameId ++ "/player/" ++ id
-    _ <- first id url
-    bencode <- HttpClient.getHttp url
-    print bencode
-    let nextMove = Parser.makeMove bencode
-    result <- HttpClient.postHttp url nextMove
-    putStrLn nextMove
-    putStrLn result
 
-first :: String -> String  -> IO String
-first "1" url = HttpClient.postHttp url (Parser.makeMove "")
-first _ _ = return ""
+first :: String -> String  -> IO (Int,String)
+first "1" gameUrl = do
+    let (_, move) = Parser.makeMove ""
+    HttpClient.postHttp gameUrl move
+first _ _ = return (500, "")
 
 getStr :: [MoveData] -> String
 getStr xs = concat [show (toSingleCoordinate (moveC c)) ++ " " ++ [moveV c] ++ "\n"| c <- xs]
