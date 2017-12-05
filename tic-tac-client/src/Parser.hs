@@ -149,9 +149,6 @@ module Parser where
     toBencode "" md = "d1:cli" ++ show (fst (moveC md)) ++ "ei" ++ show (snd (moveC md)) ++ "ee2:id" ++  show (length (moveID md)) ++ ":" ++ moveID md ++ "1:v1:" ++ [moveV md] ++ "e"
     toBencode game md = "d1:cli" ++ show (fst (moveC md)) ++ "ei" ++ show (snd (moveC md)) ++ "ee2:id" ++  show (length (moveID md)) ++ ":" ++ moveID md ++ "4:prev" ++ game ++ "1:v1:" ++ [moveV md] ++ "e"
 
-    list :: [(Int, Char)]
-    list = [(0,'x'),(1,'?'),(2,'x'),(3,'?'),(4,'?'),(5,'?'),(6,'?'),(7,'?'),(8,'?')]
-
     checkWinner :: [(Int, Char)] -> Bool
     checkWinner moves = do
         let getWinLines = [al| al <- allLines, snd (moves !! fst3 al) == snd (moves !! snd3 al),snd (moves !! snd3 al) == snd (moves !! thd3 al), snd (moves !! fst3 al) /= '?']

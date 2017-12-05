@@ -6,9 +6,6 @@ import GameClient
 url :: String
 url = "http://tictactoe.haskell.lt/game/"
 
-gameId :: String
-gameId = "holy shit!"
-
 main :: IO ()
 main = do 
     args <- getArgs
