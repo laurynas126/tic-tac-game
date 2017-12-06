@@ -16,5 +16,5 @@ main = do
         then do 
             putStrLn "No valid parameters found! "
             putStrLn "      Valid player ID: 1, 2 "
-            putStrLn "      (usage: tic-tac-client-exe <playerID> <gameID>)"
+            putStrLn "      (usage: tic-tac-client-exe <gameID> <playerID>)"
         else runCycle gameID playerID
