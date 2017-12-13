@@ -41,7 +41,10 @@ invalidRequest = responseBuilder status400 [ ("Content-Type", "text/plain") ] $ 
 postResponse :: B.ByteString -> Response
 postResponse body = do
     let (finished, responseBody) = Parser.makeMove $ cs body
-    responseBuilder status200 [ ("Content-Type", "application/bencode") ] $ mconcat $ map copyByteString [cs responseBody]
+    let responseBody2
+            | finished = "---Game has ended---"
+            | otherwise = responseBody
+    responseBuilder status200 [ ("Content-Type", "application/bencode") ] $ mconcat $ map copyByteString [cs responseBody2]
     
 -- postResponse :: Request -> Response
 -- postResponse req = do

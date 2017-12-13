@@ -1,3 +1,4 @@
+{-# LANGUAGE OverloadedStrings #-}
 module Parser where
     
     import Data.Either
@@ -6,36 +7,6 @@ module Parser where
     import Control.Monad
     import Data.Function (on)
 
-    g1 :: String
-    g1 = "d1:cli1ei1ee2:id2:LD1:v1:xe"
-      
-    g2 :: String
-    g2 = "d1:cli0ei0ee2:id2:LD4:prevd1:cli1ei1ee2:id2:LD1:v1:xe1:v1:oe"
-
-    g3 :: String
-    g3 = "d1:cli0ei1ee2:id2:LD4:prevd1:cli1ei1ee2:id2:LD1:v1:xe1:v1:oe"
-
-    msg1 :: String
-    msg1 = "d2:id5:MY_ID1:cli1ei2eee"
-    
-    msg2 :: String
-    msg2 = "d2:id5:MY_ID1:cli1ei2ee1:v1:o4:prevd2:id5:UR_ID1:cli2ei0ee1:v1:zee"
-    
-    msg3 :: String
-    msg3 = "d2:id5:MY_ID1:cli1ei2ee1:v1:o4:prevd2:id5:UR_ID1:cli2ei0ee1:v1:z4:prevd2:id5:UR_ID1:cli1ei1ee1:v1:Geee"
-    
-    message1 :: String
-    message1 = "d1:cli1ei1ee1:v1:o2:id7:ufbqJdW4:prevd1:cli0ei2ee1:v1:x2:id11:OvEdLQavGnz4:prevd1:cli0ei0ee1:v1:x2:id7:ufbqJdWeee"
-    
-    message2 :: String
-    message2 = "d1:cli2ei0ee2:id2:xO4:prevd1:cli0ei0ee2:id2:xO1:v1:oe1:v1:xe"
-    
-    message3 :: String
-    message3 = "d1:cli0ei2ee2:id1:w4:prevd1:cli2ei1ee2:id5:WgEYE4:prevd1:cli1ei1ee2:id1:w1:v1:xe1:v1:oe1:v1:xe"
-    
-    message4 :: String
-    message4 = "d1:cli2ei0ee2:id25:MnQxKaeMJPTGsApXOrSwiSNnX4:prevd1:cli1ei2ee2:id22:MCWPFWuHBPApBdNBKxjbud4:prevd1:cli2ei2ee2:id25:MnQxKaeMJPTGsApXOrSwiSNnX4:prevd1:cli2ei1ee2:id22:MCWPFWuHBPApBdNBKxjbud4:prevd1:cli0ei0ee2:id25:MnQxKaeMJPTGsApXOrSwiSNnX4:prevd1:cli0ei2ee2:id22:MCWPFWuHBPApBdNBKxjbud4:prevd1:cli1ei0ee2:id25:MnQxKaeMJPTGsApXOrSwiSNnX4:prevd1:cli0ei1ee2:id22:MCWPFWuHBPApBdNBKxjbud1:v1:oe1:v1:oe1:v1:oe1:v1:oe1:v1:oe1:v1:xe1:v1:oe1:v1:xe"
-    
     data MoveData = MoveData {
         moveC :: (Int, Int),
         moveID :: String,
@@ -63,6 +34,9 @@ module Parser where
     newMove :: MoveData
     newMove = MoveData nullCoordinates "" '?'
     
+    defaultUserID :: String
+    defaultUserID = "LD"
+
     fromLeft :: a -> Either a b -> a
     fromLeft _ (Left a) = a
     fromLeft a _        = a
@@ -112,15 +86,15 @@ module Parser where
     makeMove "" = (False, toBencode "" (snd (getNextMove [])))
     makeMove bencodeData = do
         let moves = parseDict bencodeData
-        let validateResult = validateGame (moves)
-        let nMove = getNextMove (fromRight  [] validateResult)
+        let validateResult = validateGame moves
+        let (isDone, moveD) = getNextMove (fromRight  [] validateResult)
         let resultStr
                 | isLeft validateResult = (True, fromLeft  "Could not validate" validateResult)
-                | otherwise = (fst nMove, toBencode bencodeData (snd nMove))
+                | otherwise = (isDone, toBencode bencodeData moveD)
         resultStr
 
     getNextMove :: [MoveData] -> (Bool, MoveData)
-    getNextMove [] = (False, MoveData (1,1) "LD" 'x')
+    getNextMove [] = (False, MoveData (1,1) defaultUserID 'x')
     getNextMove moveList = do
         let allMoveList = [moveC x | x <- moveList]
         let emptyList = [(toSingleCoordinate x, '?') | x <- legalMoves, x `notElem` allMoveList]
@@ -134,13 +108,13 @@ module Parser where
                 | not (null winMove) = (True, toMoveData (head winMove))
                 | not (null defMove) = (False, toMoveData (head defMove))
                 | not (null def2Move) = (False, toMoveData (head def2Move))
-                | otherwise = (False, MoveData (toDoubleCoordinate (fst (head emptyList))) "LD" 'x')
+                | otherwise = (False, MoveData (toDoubleCoordinate (fst (head emptyList))) defaultUserID 'x')
         if length emptyList == 1 
             then (True, snd getMove)
             else getMove
 
     toMoveData :: (Int, Char) -> MoveData
-    toMoveData (n, c) = MoveData (toDoubleCoordinate n) "LD" c
+    toMoveData (n, c) = MoveData (toDoubleCoordinate n) defaultUserID c
 
     sortMoves :: Ord a => [(a, b)] -> [(a, b)]
     sortMoves = sortBy (compare `on` fst)
@@ -197,6 +171,13 @@ module Parser where
 
     thd3 :: (a, b, c) -> c
     thd3 (_, _, x) = x
+
+    getLastMove :: String -> MoveData
+    getLastMove str = do
+        let parse = parseDict str
+        case parse of
+            Right m -> last m
+            _ -> newMove
 
     parseDict :: String -> Either String [MoveData]
     parseDict "de" = Right []

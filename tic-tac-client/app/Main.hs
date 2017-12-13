@@ -9,12 +9,12 @@ url = "http://tictactoe.haskell.lt/game/"
 main :: IO ()
 main = do 
     args <- getArgs
-    let (gameID, playerID)
-            | length args == 2 && ((last args == "1") || (last args == "2")) = (head args, last args)
-            | otherwise = (head args, "?") 
-    if playerID == "?"
+    let gameID
+            | length args == 1 = head args
+            | otherwise = "?"
+    if gameID == "?"
         then do 
             putStrLn "No valid parameters found! "
-            putStrLn "      Valid player ID: 1, 2 "
-            putStrLn "      (usage: tic-tac-client-exe <gameID> <playerID>)"
-        else runCycle gameID playerID
+            putStrLn "      You need to specify gameID (can be chosen randomly)"
+            putStrLn "      (usage: tic-tac-client-exe <gameID>)"
+        else runCycle gameID

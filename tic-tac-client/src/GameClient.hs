@@ -6,31 +6,31 @@ import Parser
 url :: String
 url = "http://localhost:8080/"
 
-runCycle :: String -> String -> IO ()
-runCycle gameID playerID = do
+runCycle :: String -> IO ()
+runCycle gameID = do
     let gameUrl = url ++ gameID
-    _ <- first playerID gameUrl
-    runCycle' gameUrl 1
+    let (_, move) = Parser.makeMove ""
+    runCycle' gameUrl move
 
-runCycle' :: String -> Int -> IO ()
-runCycle' _ 500 = return ()
-runCycle' _ 400 = return ()
-runCycle' gameUrl status = do
-    (responseCode, bencode) <- HttpClient.getHttp gameUrl
+runCycle' :: String -> String -> IO ()
+runCycle' gameUrl newMove = do
+    putStrLn ("Move       : " ++ show (Parser.getLastMove newMove))    
+    (responseCode, responseBody) <- HttpClient.postHttp gameUrl newMove
+    let serverMove = Parser.getLastMove responseBody
+    _ <- if Parser.isValidBencode responseBody
+        then putStrLn ("Server Move: " ++ show (Parser.getLastMove responseBody))  
+        else putStrLn ("Server     : " ++ responseBody)
     let (isDone, nextMove)
-            | responseCode /= 500 = Parser.makeMove bencode
+            | responseCode /= 500 = Parser.makeMove responseBody
             | otherwise = (True, "No response")
-    (response2, result) <- if Parser.isValidBencode nextMove
-        then HttpClient.postHttp gameUrl nextMove
-        else do
-            putStrLn nextMove
-            return (500, "")
-    if isDone
+    let isValid 
+            | Parser.isValidBencode nextMove = True
+            | otherwise = False
+    if not isValid
         then do
             putStrLn "Game is done"
             return ()
-        else runCycle' gameUrl response2
-
+        else runCycle' gameUrl nextMove
 
 first :: String -> String  -> IO (Int,String)
 first "1" gameUrl = do
