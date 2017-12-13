@@ -4,16 +4,17 @@ import HttpClient
 import Parser
 
 url :: String
-url = "http://tictactoe.haskell.lt/game/"
+url = "http://localhost:8080/"
 
 runCycle :: String -> String -> IO ()
 runCycle gameID playerID = do
-    let gameUrl = "http://tictactoe.haskell.lt/game/" ++ gameID ++ "/player/" ++ playerID
+    let gameUrl = url ++ gameID
     _ <- first playerID gameUrl
     runCycle' gameUrl 1
 
 runCycle' :: String -> Int -> IO ()
 runCycle' _ 500 = return ()
+runCycle' _ 400 = return ()
 runCycle' gameUrl status = do
     (responseCode, bencode) <- HttpClient.getHttp gameUrl
     let (isDone, nextMove)
