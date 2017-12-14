@@ -28,6 +28,8 @@ dependencies:
 - blaze-builder
 - http-types
 - string-conversions
+- stm
+- text
 
 
 library:

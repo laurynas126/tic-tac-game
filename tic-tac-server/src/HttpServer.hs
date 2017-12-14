@@ -1,38 +1,53 @@
 {-# LANGUAGE OverloadedStrings #-}
 module HttpServer where
 
+import Data.List
+import qualified Data.Text as T
 import Data.String.Conversions
 import Network.Wai
 import Network.Wai.Handler.Warp
 import Network.HTTP.Types
 import Network.HTTP.Types.Method
 import Blaze.ByteString.Builder (copyByteString)
+import Control.Concurrent.STM.TVar
+import Control.Monad.STM
 import qualified Data.ByteString.UTF8 as BU
 import qualified Data.ByteString as B
 import Data.Monoid
 import Parser
 
+
 runServer :: IO ()
 runServer = do
     let port = 8080
     putStrLn $ "Listening on port " ++ show port
-    run port app2
+    let str = []
+    tvar <- newTVarIO str
+    run port (app tvar)
     
 -- app req respond = respond $
 --     case pathInfo req of
 --         ["history"] -> history
 --         x -> postResponse req
  
-app2 req respond = do
+app tvar req respond = do
+    gameIDs <- atomically $ readTVar tvar
     body <- requestBody req
     let response = case pathInfo req of
-            ["history"] -> history
-            x -> if requestMethod req == methodPost then postResponse body
+            ["history"] -> history gameIDs
+            [x] -> if requestMethod req == methodPost then
+                    postResponse body
                  else invalidRequest
-    respond response
+            _ -> invalidRequest
+    let game = head (pathInfo req)
+    if length (pathInfo req) == 1 && game /= "history" && game `notElem` gameIDs then do
+        a <- atomically $ writeTVar tvar ((head (pathInfo req)):gameIDs)
+        respond response
+    else respond response
 
-history = responseBuilder status200 [ ("Content-Type", "text/plain") ] $ mconcat $ map copyByteString
-    [ "Here is my history:" ]
+history :: [T.Text] -> Response
+history gameIDs = responseBuilder status200 [ ("Content-Type", "text/html") ] $ mconcat $ map copyByteString
+    [ "<h1>Game history</h1>", "<ul><li>", cs $ intercalate "<li>" $ map (++ "</li>") $ map T.unpack gameIDs, "</ul>"]
 
 invalidRequest :: Response
 invalidRequest = responseBuilder status400 [ ("Content-Type", "text/plain") ] $ mconcat $ map copyByteString
