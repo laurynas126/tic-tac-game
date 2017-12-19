@@ -45,16 +45,7 @@ module Parser where
     fromRight _ (Right b) = b
     fromRight b _         = b
     
-    parseInt :: String -> (Int, String)
-    parseInt [] = (-1,[])
-    parseInt (num:rest) 
-        | num == 'i' && 'e' `elem` rest && null [x | x <- takeWhile(/= 'e') rest, x `notElem` ['0'..'9']] =
-            let
-                iAsStr = takeWhile(/= 'e') rest
-                strLength = length iAsStr + 1
-                rest1 = drop strLength rest
-                in (read iAsStr, rest1)
-        | otherwise = (-99,rest)
+
         
     validateGame :: Either String [MoveData] -> Either String [MoveData]
     validateGame (Left a) = Left a
@@ -211,6 +202,17 @@ module Parser where
                 | otherwise = Left ("Invalid data format: symbol " ++ [symbol] ++ " found")
     parseDict etc = Left ("Invalid data: Dictionary expected: " ++ etc)
     
+    parseInt :: String -> (Int, String)
+    parseInt [] = (-1,[])
+    parseInt (num:rest) 
+        | num == 'i' && 'e' `elem` rest && null [x | x <- takeWhile(/= 'e') rest, x `notElem` ['0'..'9']] =
+            let
+                iAsStr = takeWhile(/= 'e') rest
+                strLength = length iAsStr + 1
+                rest1 = drop strLength rest
+                in (read iAsStr, rest1)
+        | otherwise = (-99,rest)
+        
     parseValue :: String -> (String, String)
     parseValue [] = ([], [])
     parseValue str@(first:xs)

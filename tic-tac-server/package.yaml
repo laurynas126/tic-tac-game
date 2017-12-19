@@ -30,6 +30,7 @@ dependencies:
 - string-conversions
 - stm
 - text
+- QuickCheck
 
 
 library:
