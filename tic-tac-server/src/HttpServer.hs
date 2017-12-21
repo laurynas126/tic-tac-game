@@ -25,7 +25,8 @@ runServer = do
     let str = []
     tvar <- newTVarIO str
     run port (app tvar)
-    
+
+app :: TVar [T.Text] -> Request -> (Response -> IO ResponseReceived) -> IO ResponseReceived
 app tvar req respond = do
     gameIDs <- atomically $ readTVar tvar
     body <- requestBody req
@@ -48,7 +49,7 @@ history gameIDs = responseBuilder status200 [ ("Content-Type", "text/html") ] $ 
     , "<html lang=\"en\">\n"
     , "<head><title>Tic Tac Game History</title></head>\n"
     , "<body>\n"
-    , "<h1>Game history</h1>\n" 
+    , "<h1>Games history</h1>\n" 
     , "<ul>\n<li>"
     , cs $ intercalate "\n<li>" $ map ((++ "</li>") . T.unpack) gameIDs, "</ul>"
     , "\n</body>"]
